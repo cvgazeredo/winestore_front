@@ -1,0 +1,29 @@
+body {
+  background-image: linear-gradient(180deg, rgb(253, 253, 253), #fff 100px, #fff);
+}
+
+.container {
+  max-width: 1080px;
+}
+
+.pricing-header {
+  max-width: 700px;
+}
+
+
+.btn-outline-danger {
+  background-color: darkred;
+  color:rgb(253, 253, 253);
+  border-color: darkred;
+}
+
+.btn-outline-danger:hover {
+  background-color: rgb(110, 0, 0);
+  color:rgb(253, 253, 253);
+  border-color: darkred
+}
+
+.text-red {
+  color: rgb(103, 101, 101);
+}
+
