@@ -1,25 +1,63 @@
 
 document.addEventListener("DOMContentLoaded", function(event) {
-    console.log("DOM completamente carregado e analisado");
+    console.log("DOM loaded");
   });
 
 let orderId = 0;
+let userId = 0;
 
-const load = async () => {
-    let url = 'http://127.0.0.1:5000/order/create';
-    console.log(url)
-    await fetch(url, {
-        method: 'post',
-    })
-    .then((response) => response.json())
-    .then(data => {
-        orderId = data.order_id
-        console.log(orderId)
-    })
+
+// Validate input from user's registration:
+const signIn = () => {
+    
+    let inputUserName = document.getElementById("userName").value;
+    let inputUserAddress = document.getElementById("userAddress").value;
+
+    if (inputUserName === '' ) {
+        alert("Escreva o seu nome!");
+    } else if (inputUserAddress === '') {
+        alert("Escreva um endereço")
+    } else {
+        insertUser(inputUserName, inputUserAddress);
+    }
 }
 
+// Insert data from user:
+const insertUser = async(userName, userAddress) => {
 
+    let listProducts = document.getElementById('product-list');
+    let cartInformation = document.getElementById('cart-information');
+    let userRegister = document.getElementById('sign-in');
 
+    let url = 'http://127.0.0.1:5000/user/create';
+    console.log(url);
+
+    const formData = new FormData();
+    formData.append('name', userName);
+    formData.append('address', userAddress);
+
+    fetch(url, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data)
+        orderId = data.order_id;
+        userId = data.user_id;
+        console.log(userId)
+        listProducts.style.display = '';
+        cartInformation.style.display = 'block';
+        userRegister.style.display = 'none';
+        getList();
+    })
+    .catch((error) => {
+        alert(error.message)
+    });
+
+}
+
+// List products:
 const getList = async() => {
     let url = 'http://127.0.0.1:5000/products';
     console.log(url)
@@ -91,7 +129,8 @@ const getList = async() => {
 }
 
 
-const addProductToCart = async(productId, orderId) => {
+// Add product to cart:
+const addProductToCart = (productId, orderId) => {
     console.log(`Product id: ${productId} added to cart`)
     console.log(`Order id: ${orderId} relate to the cart`)
     
@@ -101,7 +140,7 @@ const addProductToCart = async(productId, orderId) => {
 
     console.log(formData)
     
-    let url = 'http://127.0.0.1:5000/products/add';
+    let url = 'http://127.0.0.1:5000/order/add';
     console.log(url)
     fetch(url, {
         method: 'POST',
@@ -121,12 +160,15 @@ const addProductToCart = async(productId, orderId) => {
 
 }
 
-const buyOrder = async(orderId) => {
+// Buy order: 
+const buyOrder = async() => {
     console.log("Reached buyOrder function")
     console.log(orderId)
+    console.log(userId)
 
     const formData = new FormData();
-    formData.append('id', orderId);
+    formData.append('order_id', orderId);
+    formData.append('user_id', userId);
 
     let url = 'http://127.0.0.1:5000/order/buy';
     fetch(url, {
@@ -149,22 +191,17 @@ const buyOrder = async(orderId) => {
     });
 }
 
+// Delete item from cart: 
 const deleteItem = async(itemId) => {
     console.log("Reached deleteItem function")
     
     console.log(itemId);
 
 
-    let url = 'http://127.0.0.1:5000/item/delete?item_id=' + itemId;
+    let url = 'http://127.0.0.1:5000/order/delete?item_id=' + itemId;
     fetch(url, {
         method: 'delete',
     })
-    // .then(response => { 
-    //     if(!response.ok) {
-    //         throw new Error("Order already closed");
-    //     }
-    //     return response;
-    // })
     .then(response => response.json()) 
     .then(data => { buildCart(data) })
     .catch((error) => {
@@ -172,6 +209,8 @@ const deleteItem = async(itemId) => {
     });
 }
 
+
+// List items of cart: 
 const buildCart = (listItems) => {
     console.log("Build Cart function reached!")
     console.log(listItems)
@@ -205,7 +244,7 @@ const buildCart = (listItems) => {
     button = 
         `
         <li class="list-group-item d-flex justify-content-between">
-            <button type="button" class="btn btn-outline-danger w-100" onclick="buyOrder(${orderId})">Comprar</button>
+            <button type="button" class="btn btn-outline-danger w-100" onclick="buyOrder()">Comprar</button>
         </li>
         `
 
@@ -215,5 +254,3 @@ const buildCart = (listItems) => {
         
 }
 
-load();
-getList();
